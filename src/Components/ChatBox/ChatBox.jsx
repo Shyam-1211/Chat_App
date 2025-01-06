@@ -11,40 +11,51 @@ const ChatBox = () => {
 
     const sendMessage = async () => {
       try {
-        if (input && messagesId ) {
-          await updateDoc(doc(db,'messages',messagesId),{
+        if (input && messagesId) {
+          // Update the messages array with the new message
+          await updateDoc(doc(db, 'messages', messagesId), {
             messages: arrayUnion({
-              sId:userData.id,
-              text:input,
+              sId: userData.id,
+              text: input,
               createdAt: new Date()
             })
-          })
-          const userIDs = [chatUser.rId,userData.id]
-
-          userIDs.forEach(async (id)=>{
-            const userChatsRef = doc(db,'chats',id)
-            const userChatsSnapshot = await getDoc(userChatsRef)
-
+          });
+    
+          // Define user IDs to update both users' chats
+          const userIDs = [chatUser.rId, userData.id];
+    
+          userIDs.forEach(async (id) => {
+            const userChatsRef = doc(db, 'chats', id);
+            const userChatsSnapshot = await getDoc(userChatsRef);
+    
             if (userChatsSnapshot.exists()) {
-              const userChatData = userChatsSnapshot.data()
-              const chatIndex = userChatData.chatData.findIndex((c)=>c.messageId === messagesId)
-              userChatData.chatData[chatIndex].lastMessage= input.slice(0,30)
-              userChatData.chatData[chatIndex].updatedAt = Date.now()
-              if (userChatData.chatData[chatIndex].rId === userData.id) {
-                userChatData.chatData[chatIndex].messageSeen = false 
+              const userChatData = userChatsSnapshot.data();
+              const chatIndex = userChatData.chatData.findIndex((c) => c.messageId === messagesId);
+    
+              if (chatIndex !== -1) {
+                userChatData.chatData[chatIndex].lastMessage = input.slice(0, 30); // Truncate message
+                userChatData.chatData[chatIndex].updatedAt = Date.now();
+    
+                // Mark the message as not seen by the recipient (if applicable)
+                if (userChatData.chatData[chatIndex].rId === userData.id) {
+                  userChatData.chatData[chatIndex].messageSeen = false;
+                }
+    
+                await updateDoc(userChatsRef, {
+                  chatData: userChatData.chatData
+                });
               }
-              await updateDoc(userChatsRef,{
-                chatData:userChatData.chatData
-              })
             }
-          })
+          });
+    
+          setInput(""); // Clear input after sending
         }
       } catch (error) {
-        toast.error(error.messages)
+        toast.error("Error sending message.");
+        console.error(error);
       }
-      setInput("")
-    }
-
+    };
+    
     const convertTimestamp = (timestamp)=>{
       let date = timestamp.toDate()
       const hour = date.getHours()
@@ -85,18 +96,19 @@ const ChatBox = () => {
           </div>
   
           <div className="chat-msg h-[calc(100%-70px)] pb-12 overflow-y-scroll flex flex-col-reverse">
-            {messages.map((msg, index) => (
-              <div key={index} className={msg.sId === userData.id ? 's-msg flex items-end justify-end gap-2 px-4 py-2' : 'r-msg flex items-end justify-start gap-2 px-4 py-2'}>
-                <p className="msg text-white bg-[#077EFF] p-2 max-w-[200px] text-[11px] font-light rounded-[8px_8px_0_8px] mb-7">
-                  {msg.text}
-                </p>
-                <div className="text-center text-[9px]">
-                  <img className="w-[27px] h-[27px] rounded-full" src={msg.sId === userData.id ? assets.profile_img : assets.profile_img} alt="" />
-                  <p>{convertTimestamp(msg.createdAt)}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+  {messages.map((msg, index) => (
+    <div key={index} className={msg.sId === userData.id ? 's-msg flex items-end justify-end gap-2 px-4 py-2' : 'r-msg flex items-end justify-start gap-2 px-4 py-2'}>
+      <p className="msg text-white bg-[#077EFF] p-2 max-w-[200px] text-[11px] font-light rounded-[8px_8px_0_8px] mb-7">
+        {msg.text}
+      </p>
+      <div className="text-center text-[9px]">
+        <img className="w-[27px] h-[27px] rounded-full" src={msg.sId === userData.id ? assets.profile_img : assets.profile_img} alt="" />
+        <p>{convertTimestamp(msg.createdAt)}</p>
+      </div>
+    </div>
+  ))}
+</div>
+
   
           <div className="chat-input flex items-center gap-3 p-3 bg-white absolute bottom-0 left-0 right-0">
             <input
