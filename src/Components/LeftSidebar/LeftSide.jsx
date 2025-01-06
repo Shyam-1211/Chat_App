@@ -5,9 +5,8 @@ import { useNavigate } from 'react-router-dom'
 import { db, logout } from '../../config/firebase'
 import { arrayUnion, collection, getDocs, query, serverTimestamp, setDoc, updateDoc, where } from 'firebase/firestore'
 import { AppContext } from '../../context/AppContext'
-import { doc } from 'firebase/firestore'
+import { doc,getDoc } from 'firebase/firestore'
 import { toast } from 'react-toastify'
-import { getDoc } from 'firebase/firestore/lite'
 const LeftSide = () => {
 
     const navigate = useNavigate()
@@ -106,10 +105,10 @@ const LeftSide = () => {
         const userChatssRef = doc(db,"chats",userData.id)
         const userChatsSnapshot = await getDoc(userChatssRef)
         const userChatsData = userChatsSnapshot.data()
-        const chatIndex = userChatsData.chatsData.findIndex((c)=>c.messageId===item.messageId)
-        userChatsData.chatsData[chatIndex].messageSeen = true
+        const chatIndex = userChatsData.chatData.findIndex((c)=>c.messageId===item.messageId)
+        userChatsData.chatData[chatIndex].messageSeen = true
         await updateDoc(userChatssRef,{
-            chatsData:userChatsData.chatsData
+            chatData:userChatsData.chatData
         })
         setChatVisible(true)
         
@@ -130,7 +129,7 @@ const LeftSide = () => {
 
   return (
     <>
-    <div className={`ls ${chatVisible? "hidden" : ""}`}>
+    <div className='ls'>
         <div className="ls-top">
             <div className="ls-nav">
                 <img src={assets.logo} className='logo' />

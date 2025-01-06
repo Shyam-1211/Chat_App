@@ -58,18 +58,17 @@ const ChatBox = () => {
       }
     }
 
-    useEffect(()=>{
+    useEffect(() => {
       if (messagesId) {
-        const unSub = onSnapshot(doc(db,'messages',messagesId),(res)=>{
-          setMessages(res.data().messages.reverse())
-          console.log(res.data().messages.reverse());
-          
-        }) 
-        return ()=>{
+        const unSub = onSnapshot(doc(db, 'messages', messagesId), (res) => {
+          setMessages(res.data().messages.reverse());
+        });
+        return () => {
           unSub();
-        }
+        };
       }
-    },[messagesId])
+    }, [messagesId]); // Ensure messagesId is properly set and stable
+    
 
     return chatUser ? (
       <>
