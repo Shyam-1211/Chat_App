@@ -71,70 +71,56 @@ const ChatBox = () => {
       }
     },[messagesId])
 
-  return chatUser ?(
-    <>
-    <div className="chat-box">
-      <div className="chat-user">
-        <img src={assets.profile_img} alt="" />
-        <p>{chatUser.userData.name} {Date.now()-chatUser.userData.lastSeen <= 70000 ? <img className='dot' src={assets.green_dot}/>: null} </p>
-        <img src={assets.help_icon} className='help' alt="" />
-      </div> 
-
-      <div className="chat-msg">
-        {/* SENDER */}
-        {messages.map((msg,index)=>
-        (
-          <div key={index} className={msg.sId === userData.id ? "s-msg" : "r-msg"}>
-          <p className="msg">{msg.text}</p>
-          <div>
-            <img src={msg.sId === userData.id? assets.profile_img : assets.profile_img} alt="" />
-            <p>{convertTimestamp(msg.createdAt)}</p>
+    return chatUser ? (
+      <>
+        <div className="chat-box h-[75vh] relative bg-[#f1f5ff]">
+          <div className="chat-user p-3 flex items-center gap-3 border-b border-[#c6c6c6]">
+            <img className="w-[38px] rounded-full" src={assets.profile_img} alt="" />
+            <p className="flex-1 text-xl font-medium text-[#393939]">
+              {chatUser.userData.name}
+              {Date.now() - chatUser.userData.lastSeen <= 70000 ? (
+                <img className="dot w-[15px] h-[15px]" src={assets.green_dot} alt="" />
+              ) : null}
+            </p>
+            <img className="help w-[22px] cursor-pointer" src={assets.help_icon} alt="" />
+          </div>
+  
+          <div className="chat-msg h-[calc(100%-70px)] pb-12 overflow-y-scroll flex flex-col-reverse">
+            {messages.map((msg, index) => (
+              <div key={index} className={msg.sId === userData.id ? 's-msg flex items-end justify-end gap-2 px-4 py-2' : 'r-msg flex items-end justify-start gap-2 px-4 py-2'}>
+                <p className="msg text-white bg-[#077EFF] p-2 max-w-[200px] text-[11px] font-light rounded-[8px_8px_0_8px] mb-7">
+                  {msg.text}
+                </p>
+                <div className="text-center text-[9px]">
+                  <img className="w-[27px] h-[27px] rounded-full" src={msg.sId === userData.id ? assets.profile_img : assets.profile_img} alt="" />
+                  <p>{convertTimestamp(msg.createdAt)}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+  
+          <div className="chat-input flex items-center gap-3 p-3 bg-white absolute bottom-0 left-0 right-0">
+            <input
+              onChange={(e) => setInput(e.target.value)}
+              value={input}
+              type="text"
+              placeholder="Enter Your Message"
+              className="flex-1 border-none outline-none"
+            />
+            <input type="file" id="image" accept="image/png, image/jpeg" hidden />
+            <label htmlFor="image">
+              <img className="w-[22px] cursor-pointer" src={assets.gallery_icon} alt="" />
+            </label>
+            <img onClick={sendMessage} className="w-[30px] cursor-pointer" src={assets.send_button} alt="" />
           </div>
         </div>
-        ))}
-        {/* <div className="s-msg">
-          <p className="msg">Lorem ipsum dolor sit amet.</p>
-          <div>
-            <img src={assets.profile_img} alt="" />
-            <p>4:30pm</p>
-          </div>
-        </div> */}
-    {/* IMAGES */}
-        {/* <div className="s-msg">
-          <img src={assets.pic1} alt="" className='msg-img'/>
-          <div>
-            <img src={assets.profile_img} alt="" />
-            <p>4:30pm</p>
-          </div>
-        </div> */}
-        {/* receiver */}
-        {/* <div className="r-msg">
-          <p className="msg">Lorem ipsum dolor sit amet.</p>
-          <div>
-            <img src={assets.profile_img} alt="" />
-            <p>4:30pm</p>
-          </div>
-        </div> */}
+      </>
+    ) : (
+      <div className="chat-welcome w-full flex flex-col items-center justify-center gap-2">
+        <img className="w-[60px]" src={assets.logo_icon} alt="" />
+        <p className="text-xl font-medium text-[#393939]">Chat anytime..</p>
       </div>
-
-
-
-
-      <div className="chat-input">
-        <input onChange={(e)=>setInput(e.target.value)} value={input} type="text" placeholder='Enter Your Message'/>
-        <input type="file" id='image' accept='image/png, image/jpeg' hidden/>
-        <label htmlFor="image">
-          <img src={assets.gallery_icon} alt="" />
-        </label>
-        <img onClick={sendMessage} src={assets.send_button} alt="" />
-      </div>
-    </div>
-    </>
-  ): <div className='chat-welcome'>
-    <img src={assets.logo_icon}/>
-    <p>Chat anytime..</p>
-  </div>
-
-}
+    );
+  };
 
 export default ChatBox
